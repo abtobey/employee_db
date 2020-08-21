@@ -1,0 +1,23 @@
+{
+  "name": "employee_db",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abtobey/employee_db.git"
+  },
+  "author": "Aaron Tobey",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/abtobey/employee_db/issues"
+  },
+  "homepage": "https://github.com/abtobey/employee_db#readme",
+  "dependencies": {
+    "mysql": "^2.18.1",
+    "nquirer": "^0.1.8"
+  }
+}
