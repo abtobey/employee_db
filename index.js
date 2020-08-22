@@ -82,7 +82,7 @@ async function newOperation(){
     let choice= await inquirer.prompt({
         name: "selection",
         message: "What would you like to do? ",
-        choices:["View employees","View employees by department","View employees by role","Add employee", "Add department", "Add role", "Update Role","Exit"],
+        choices:["View employees","View employees by department","View employees by role","Add employee", "Add department", "Add role", "Update Role","Remove Employee","Exit"],
         type:"list"
     })
     switch (choice.selection) {
@@ -190,8 +190,66 @@ async function newOperation(){
         })
             break;
         case "Add department":
+            let newDepartment= await inquirer.prompt({
+                name:"departmentName",
+                message:"Name of department",
+                type: "input",
+                //validate that user did not enter a blank because name does not allow nulls. 
+                validate: function (value){
+                    if(value !==""){
+                        return true;
+                    }
+                    return "Please enter a department name";
+                }
+            })
+            console.log(newDepartment.departmentName);
+            connection.query("INSERT INTO department SET ?",{name: newDepartment.departmentName}, function(err,data){
+                if(err) throw err;
+            })
+            newOperation();
             break;
         case "Add role":
+            //query list of departments
+            connection.query("SELECT * FROM department", async function(err,data){
+                if(err) throw err;
+                //map list of departments
+                const departments = data.map(item => item.name)
+                let newRole= await inquirer.prompt([{
+                    name: "departmentSelect",
+                    message: "Select a department: ",
+                    choices: departments,
+                    type: "list"
+                },
+                {
+                    name: "roleName",
+                    message: "Name of role",
+                    type: "input"
+                },
+                {
+                    name: "salary",
+                    message: "Enter salary for role: ",
+                    type: "input",
+                    validate: function (value){
+                        if(isNaN(value)){
+                            return "Please enter a number."
+                        }
+                        else{
+                            return true;
+                        }
+                    }
+                }
+            ]);
+            //get id of department that matches name
+            department_id=data.filter(item => item.name === newRole.departmentSelect)[0].ID;
+            // console.log(newRole.departmentSelect);
+            connection.query("INSERT INTO role SET ?",{
+                title: newRole.roleName,
+                salary: newRole.salary,
+                department_id: department_id
+            })
+            newOperation();
+            });
+            
             break;        
         case "Exit":
             connection.end();
