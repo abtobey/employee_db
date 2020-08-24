@@ -47,6 +47,40 @@ const getDepartments =()=> new Promise((res,rej) =>{
     })
 });
 
+const getManagers = () => new Promise((res,rej) =>{
+    connection.query(`
+    select distinct
+    b.ID,
+    concat(b.last_name, ", ", b.first_name) as managerName
+    from employee b
+    inner join employee a on a.manager_id=b.id
+    `, function(err,data){
+        if (err) throw err;
+        res(data);
+    })
+})
+
+const getEmployeesByManager = (ID)=> new Promise((res,rej)=>{
+    connection.query(`
+    select 
+    a.ID,
+    a.first_name,
+    a.last_name,
+    b.title,
+    b.salary,
+    concat(c.first_name , " " , c.last_name) as manager
+    from employee a
+    left join role b on a.role_id=b.ID
+    left join employee c on a.manager_id=c.ID
+    where a.manager_id =?
+    order by a.last_name;
+    `
+    ,[ID],function(err,data){
+    if (err) throw err;
+      res(data);
+    })
+});
+
 const getEmployeesByRole = (role)=> new Promise((res,rej)=>{
     connection.query(`
     select 
@@ -120,7 +154,7 @@ async function newOperation(){
     let choice= await inquirer.prompt({
         name: "selection",
         message: "What would you like to do? ",
-        choices:["View employees","View employees by department","View employees by role","Add employee", "Add department", "Add role", "Update role","Update employee","Exit"],
+        choices:["View employees","View employees by department","View employees by role","View employees by manager","Add employee", "Add department", "Add role", "Update role","Update employee","Exit"],
         type:"list"
     })
     switch (choice.selection) {
@@ -151,6 +185,23 @@ async function newOperation(){
                 });  
             });
         });
+            break;
+        case "View employees by manager":
+            const managerList= await getManagers();
+            //map list of names
+            const managerNames = managerList.map(item => item.managerName)
+            inquirer.prompt({
+                name: "managerSelect",
+                message: "Select Manager",
+                choices: managerNames,
+                type: "list"
+            }).then(function(resp){
+                let managerID= managerList.filter(item => item.managerName===resp.managerSelect)[0].ID;
+                getEmployeesByManager(managerID).then((data)=>{
+                    console.table(data);
+                    newOperation();
+                })
+            })
             break;
         case "View employees by role":
             //query roles table for list of titles
