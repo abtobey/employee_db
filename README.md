@@ -27,7 +27,7 @@ Type in node index.js to run the program and select options using the arrow keys
 
 See below for a brief video demostrating the usage of this application
 
-(Demostration)[https://youtu.be/cqAbzZvDA70]
+[Demostration](https://youtu.be/cqAbzZvDA70)
 
 ---
 
